@@ -1,4 +1,4 @@
-.PHONY: build compile test
+.PHONY: build compile test install
 
 include .env
 
@@ -8,3 +8,9 @@ compile:; forge compile
 
 test:
 	forge test
+
+install:
+	forge install OpenZeppelin/openzeppelin-contracts
+	forge install Cyfrin/foundry-devops
+	remappings > remappings.txt
+	
