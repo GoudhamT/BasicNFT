@@ -18,6 +18,8 @@ contract BasicNFTInteractions is Script {
     }
 
     function mintingNFT(address _contractAddress) public {
+        vm.startBroadcast();
         BasicNFT(_contractAddress).mintNFT(PUG_URI);
+        vm.stopBroadcast();
     }
 }
