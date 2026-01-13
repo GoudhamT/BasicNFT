@@ -9,11 +9,14 @@ contract MoodNFT is ERC721 {
     uint256 private s_tokenCounter;
     string private s_happySVGImageURI;
     string private s_sadSVGImageURI;
-    enum Mood{
+
+    error MoodNFT__YouCannotChangeMood();
+    enum Mood {
         HAPPY,
         SAD
     }
     mapping(uint256 => Mood) private s_tokenIdToMood;
+
     constructor(
         string memory _happySVGImageURI,
         string memory _sadSVGImageURI
@@ -29,27 +32,45 @@ contract MoodNFT is ERC721 {
         s_tokenCounter++;
     }
 
+    function _headerBase() internal pure returns (string memory) {
+        return "data:application/json;base64,";
+    }
+
     function tokenURI(
         uint256 _tokenId
     ) public view override returns (string memory) {
         string memory imageURI;
-        if(s_tokenIdToMood[_tokenId] == Mood.HAPPY){
+        if (s_tokenIdToMood[_tokenId] == Mood.HAPPY) {
             imageURI = s_happySVGImageURI;
-        }
-        else{
+        } else {
             imageURI = s_sadSVGImageURI;
         }
-         bytes memory json = abi.encodePacked(
-            '{',
-                '"name":"', name(), '",',
-                '"description":"Mood NFT",',
-                '"image":"', imageURI, '",',
-                '"attributes":[{',
-                    '"trait_type":"Moodiness",',
-                    '"value":100',
-                '}]',
-            '}'
+        bytes memory json = abi.encodePacked(
+            "{",
+            '"name":"',
+            name(),
+            '",',
+            '"description":"Mood NFT",',
+            '"image":"',
+            imageURI,
+            '",',
+            '"attributes":[{',
+            '"trait_type":"Moodiness",',
+            '"value":100',
+            "}]",
+            "}"
         );
-        abi.encodePacked()
+        return string(abi.encodePacked(_headerBase(), Base64.encode(json)));
+    }
 
+    function flipMood(uint256 _tokenId) public {
+        if (!(ownerOf(_tokenId) == msg.sender)) {
+            revert MoodNFT__YouCannotChangeMood();
+        }
+        if (s_tokenIdToMood[_tokenId] == Mood.HAPPY) {
+            s_tokenIdToMood[_tokenId] = Mood.SAD;
+        } else {
+            s_tokenIdToMood[_tokenId] = Mood.HAPPY;
+        }
+    }
 }
